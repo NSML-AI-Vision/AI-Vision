@@ -12,32 +12,25 @@ import pickle
 import nsml
 import numpy as np
 import torch
-import torch.utils.data as data
-import torchvision.transforms as transforms
 
 from nsml import DATASET_PATH
 
 import tensorflow as tf
 import tensorflow.keras as keras
-from tensorflow.keras.models import Sequential, Model
+from tensorflow.keras.models import Sequential
 from tensorflow.keras.applications.vgg19 import VGG19
 import tensorflow.keras.backend as K
-from data_loader import train_data_loader
+from data_loader import train_data_loader, TestDataset
 from pprint import pprint
 from sklearn.metrics.pairwise import cosine_similarity
 
-class TestDataset(data.Dataset):
-    def __init__(self, img_arr):
-        self.img_arr = img_arr
 
-    def __getitem__(self, index):
-        return self.img_arr[index]
+num_classes = 1002
+input_shape = (224, 224, 3)  # input image shape
 
-    def __len__(self):
-        return len(self.img_arr)
-        
+
 def infer_loader(img_arr, layer_fn):
-    test_loader = torch.utils.data.DataLoader(dataset=TestDataset(img_arr), batch_size=128, num_workers=os.cpu_count())
+    test_loader = torch.utils.data.DataLoader(dataset=TestDataset(img_arr), batch_size=64, num_workers=os.cpu_count())
     
     query_arr = None
 
@@ -117,7 +110,8 @@ def bind_model(model):
         print('model saved!')
 
     def load(file_path):
-        pass
+        model.load_weights(os.path.join(file_path, 'model'))
+        print('model loaded!')
 
     def infer(queries, db):
 
@@ -191,7 +185,7 @@ if __name__ == '__main__':
 
     # DONOTCHANGE: They are reserved for nsml
     args.add_argument('--mode', type=str, default='train', help='submit일때 해당값이 test로 설정됩니다.')
-    args.add_argument('--iteration', type=str, default='0', help='fork 명령어를 입력할때의 체크포인트로 설정됩니다. 체크포인트 옵션을 안주면 마지막 wall time 의 model 을 가져옵니다.')
+    args.add_argument('--iteration', type=str, default='0', help='')
     args.add_argument('--pause', type=int, default=0, help='model 을 load 할때 1로 설정됩니다.')
     config = args.parse_args()
 
